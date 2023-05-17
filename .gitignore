@@ -1,0 +1,11 @@
+data/
+.pytest_cache
+.idea/
+test_gen_code.py
+.env
+**/__pycache__/
+**/.pytest*
+logs/
+notebooks/
+venv/
+*.egg-info/
