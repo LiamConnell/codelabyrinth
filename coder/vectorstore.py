@@ -4,6 +4,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import Document
 from langchain.vectorstores.pgvector import PGVector
 
+from coder.db import Database
 
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
     driver=os.environ.get("POSTGRES_DRIVER", "psycopg2"),
@@ -19,6 +20,7 @@ class VectorStore:
     def __init__(self, connection_string=None, embedding_fn=None):
         self.connection_string = connection_string or CONNECTION_STRING
         self.embedding_fn = embedding_fn or OpenAIEmbeddings()
+        self.db = Database()
 
     def create_collection(self, collection_name: str, collection_metadata: dict = None):
         PGVector(self.connection_string, self.embedding_fn, collection_name, collection_metadata)
@@ -35,3 +37,8 @@ class VectorStore:
 
     def similarity_search(self, collection_name, *args, **kwargs):
         return PGVector(self.connection_string, self.embedding_fn, collection_name).similarity_search(*args, **kwargs)
+
+    def list_collections(self) -> list[str]:
+        collections = self.db.fetch_query("SELECT name from langchain_pg_collection")
+        collections = [c[0] for c in collections]
+        return collections
