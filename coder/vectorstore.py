@@ -6,12 +6,12 @@ from langchain.vectorstores.pgvector import PGVector
 
 
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
-    driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
-    host=os.environ.get("PGVECTOR_HOST", "localhost"),
-    port=int(os.environ.get("PGVECTOR_PORT", "5432")),
-    database=os.environ.get("PGVECTOR_DATABASE", "postgres"),
-    user=os.environ.get("PGVECTOR_USER", "postgres"),
-    password=os.environ.get("PGVECTOR_PASSWORD"),
+    driver=os.environ.get("POSTGRES_DRIVER", "psycopg2"),
+    host=os.environ.get("POSTGRES_HOST", "localhost"),
+    port=int(os.environ.get("POSTGRES_PORT", "5432")),
+    database=os.environ.get("POSTGRES_DATABASE", "postgres"),
+    user=os.environ.get("POSTGRES_USER", "postgres"),
+    password=os.environ.get("POSTGRES_PASSWORD"),
 )
 
 
@@ -30,5 +30,8 @@ class VectorStore:
         return PGVector(self.connection_string, self.embedding_fn, collection_name)
 
     def add_docs(self, collection_name, docs: list[Document]):
-        PGVector.from_documents(docs, collection_name=collection_name,
+        PGVector.from_documents(documents=docs, collection_name=collection_name,
                                 embedding=self.embedding_fn, connection_string=CONNECTION_STRING)
+
+    def similarity_search(self, collection_name, *args, **kwargs):
+        return PGVector(self.connection_string, self.embedding_fn, collection_name).similarity_search(*args, **kwargs)
