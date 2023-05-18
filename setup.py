@@ -22,8 +22,8 @@ setup(
     packages=find_packages(include="coder.*"),
     entry_points={
         'console_scripts': [
-            'coder = coder.__main__:coder',
-            'store_directory = coder.__main__:store_directory'
+            'code = coder.__main__:code',
+            'ingest = coder.__main__:ingest'
         ]
     },
     description="GPT based code assistant",
