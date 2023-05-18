@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query
 from coder import coder, tasks
+from coder.vectorstore import VectorStore
 
 app = FastAPI()
 
@@ -26,6 +27,19 @@ async def ingest_github(repo_url: str = Query(..., description="Pull code from a
     owner, repo = repo_url.split('/')[-2:]
     tasks.ingest_github_repo(owner, repo)
     return {"status": "success", "message": f"GitHub repository '{repo_url}' ingested successfully"}
+
+
+@app.get("/collections")
+async def list_collections():
+    v = VectorStore()
+    return v.list_collections()
+
+
+@app.delete("/collections/{collection_name}")
+def delete_collection(collection_name):
+    v = VectorStore()
+    v.delete_collection(collection_name=collection_name)
+    return {"status": "success", "message": f"Collection {collection_name} deleted successfully"}
 
 
 if __name__ == "__main__":

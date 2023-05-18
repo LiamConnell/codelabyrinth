@@ -1,6 +1,7 @@
 import click
 from coder import coder
 from coder import tasks
+from coder.vectorstore import VectorStore
 
 
 @click.group()
@@ -11,15 +12,32 @@ def cli():
     pass
 
 
-@cli.group("code")
-def code():
-    pass
-
-
 @cli.command("api")
 def api():
     import uvicorn
     uvicorn.run("coder.api:app", host="0.0.0.0", port=8000, reload=True)
+
+
+@cli.group("collections")
+def collections():
+    pass
+
+
+@collections.command("list")
+def list_collections():
+    v = VectorStore()
+    print(v.list_collections())
+
+
+@collections.command("delete")
+def delete_collection(collection_name):
+    v = VectorStore()
+    v.delete_collection(collection_name=collection_name)
+
+
+@cli.group("code")
+def code():
+    pass
 
 
 @code.command("qa")
