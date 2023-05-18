@@ -12,7 +12,9 @@ REQUIREMENTS = [
     'tiktoken',
     'faiss-cpu',
     'click',
-    'pgvector'
+    'pgvector',
+    'fastapi',
+    'uvicorn'
 ]
 
 setup(

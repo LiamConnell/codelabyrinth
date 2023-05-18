@@ -1,4 +1,3 @@
-# 4. Set up a chain for assisting with code extension
 from langchain import PromptTemplate, LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document
@@ -24,6 +23,7 @@ def qa(question, vectorstore_collection=None):
     clogger.log_prompt(prompt_template.format(context=context, question=question))
     clogger.log_response(result['text'])
     clogger.log_metadata(result)
+    return result['text']
 
 
 def _format_doc(doc: Document):

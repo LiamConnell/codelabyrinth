@@ -16,6 +16,12 @@ def code():
     pass
 
 
+@cli.command("api")
+def api():
+    import uvicorn
+    uvicorn.run("coder.api:app", host="0.0.0.0", port=8000, reload=True)
+
+
 @code.command("qa")
 @click.argument('question')
 def qa(question):
