@@ -1,6 +1,7 @@
 import glob
 import os
 import traceback
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 import logging
 
@@ -41,6 +42,9 @@ def load_docs_website(base_url: str, max_workers: int = 10) -> list[Document]:
         List[Document]: A list of Document objects containing scraped information.
 
     """
+    if base_url[-1] != "/":
+        base_url += "/"
+
     response = requests.get(base_url)
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -49,7 +53,7 @@ def load_docs_website(base_url: str, max_workers: int = 10) -> list[Document]:
 
     def scrape_doc_(link):
         try:
-            doc = _scrape_doc(f"{base_url}{link}")
+            doc = _scrape_doc(urllib.parse.urljoin(base_url, link))
         except Exception as e:
             LOGGER.error(e)
             LOGGER.error(traceback.format_exc())
@@ -109,7 +113,7 @@ def load_github_repo(owner: str, repo: str, path: str = "", file_types: list[str
     Returns:
         List[Document]: A list of Document objects containing the content of the files.
     """
-    file_types = file_types or ["*"]
+    file_types = file_types or [""]
     url = f"{GITHUB_API_BASE_URL}/repos/{owner}/{repo}/contents/{path}"
     response = requests.get(url, auth=(GITHUB_USER, GITHUB_TOKEN))
 
@@ -127,8 +131,7 @@ def load_github_repo(owner: str, repo: str, path: str = "", file_types: list[str
             if content:
                 docs.append(
                     Document(
-                        title=file["path"],
-                        content=content,
+                        page_content=content,
                         metadata={"owner": owner, "repo": repo, "path": file["path"], "source": file["html_url"]}
                     )
                 )

@@ -13,7 +13,7 @@ llm = ChatOpenAI(model_name="gpt-4", temperature=0)
 chain = LLMChain(llm=llm, prompt=PROMPT)
 
 
-def coder(question, vectorstore_collection=None):
+def qa(question, vectorstore_collection=None):
     v = VectorStore()
     vectorstore_collection = vectorstore_collection or get_git_hash()
     docs = v.similarity_search(vectorstore_collection, question, k=5)

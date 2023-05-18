@@ -1,5 +1,5 @@
 import click
-import coder.coder as coder_
+from coder import coder
 from coder import tasks
 
 
@@ -16,13 +16,13 @@ def code():
     pass
 
 
-@code.command("run")
+@code.command("qa")
 @click.argument('question')
-def coder(question):
+def qa(question):
     """
     Ask the coder something.
     """
-    print(coder_.coder(question))
+    print(coder.qa(question))
 
 
 @cli.group("ingest")
