@@ -1,24 +1,29 @@
 # 4. Set up a chain for assisting with code extension
-from langchain import PromptTemplate, OpenAI, LLMChain
+from langchain import PromptTemplate, LLMChain
+from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document
 
-from coder.utils import get_git_hash
+from coder.utils import get_git_hash, ConversationLogger, summarize_title
 from coder.vectorstore import VectorStore
 
 prompt_template = "Context:\n{context}\n\n Question: {question}"
 PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
-llm = OpenAI(temperature=0)
+
+llm = ChatOpenAI(model_name="gpt-4", temperature=0)
 chain = LLMChain(llm=llm, prompt=PROMPT)
 
 
 def coder(question, vectorstore_collection=None):
     v = VectorStore()
     vectorstore_collection = vectorstore_collection or get_git_hash()
-    print(vectorstore_collection)
     docs = v.similarity_search(vectorstore_collection, question, k=5)
     context = "\n".join([_format_doc(doc) for doc in docs])
-    print(context)
-    return chain.apply([{"question": question, "context": context}])[0]
+    result = chain.apply([{"question": question, "context": context}])[0]
+
+    clogger = ConversationLogger(summarize_title(question))
+    clogger.log_prompt(prompt_template.format(context=context, question=question))
+    clogger.log_response(result['text'])
+    clogger.log_metadata(result)
 
 
 def _format_doc(doc: Document):

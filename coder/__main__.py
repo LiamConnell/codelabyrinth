@@ -26,8 +26,9 @@ def coder(question):
 
 @langchain_cli.command()
 @click.argument('path')
-def store_directory(path):
+def ingest_directory(path):
     """
     Pull a certain directory of code into the vectorstore
     """
     tasks.store_directory(path)
+
