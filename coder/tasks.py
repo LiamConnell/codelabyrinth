@@ -1,36 +1,36 @@
 from datetime import datetime
 
-from coder import vectorstore, ingesters, utils
+from coder import vectorstore, doc_loaders, utils
 
 
-def store_directory(path, metadata, name=None):
+def ingest_directory(path, metadata=None, name=None):
     name = name or utils.get_git_hash()
 
     v = vectorstore.VectorStore()
-    docs = ingesters.ingest_code_files(path)
+    docs = doc_loaders.load_code_files(path)
 
-    metadata.update({"codebase": path, "timestamp": str(datetime.now())})
+    (metadata or {}).update({"codebase": path, "timestamp": str(datetime.now())})
     v.create_collection(name, metadata)
     v.add_docs(name, docs)
 
 
-def store_website(base_url, metadata, name=None):
+def ingest_website(base_url, metadata=None, name=None):
     name = name or base_url
 
     v = vectorstore.VectorStore()
-    docs = ingesters.ingest_docs_website(base_url)
+    docs = doc_loaders.load_docs_website(base_url)
 
-    metadata.update({"base_url": base_url, "timestamp": str(datetime.now())})
+    (metadata or {}).update({"base_url": base_url, "timestamp": str(datetime.now())})
     v.create_collection(name, metadata)
     v.add_docs(name, docs)
 
 
-def store_github(owner, repo, path, file_types, metadata, name=None):
+def ingest_github_repo(owner, repo, path="", file_types=None, metadata=None, name=None):
     name = name or f"{owner}/{repo}/{path}"
     v = vectorstore.VectorStore()
-    docs = ingesters.ingest_github_repo(owner, repo, path, file_types)
+    docs = doc_loaders.load_github_repo(owner, repo, path, file_types)
 
-    metadata.update({"owner": owner, "repo": repo, "path": path,
-                     "file_types": file_types, "timestamp": str(datetime.now())})
+    (metadata or {}).update({"owner": owner, "repo": repo, "path": path,
+                             "file_types": file_types, "timestamp": str(datetime.now())})
     v.create_collection(name, metadata)
     v.add_docs(name, docs)

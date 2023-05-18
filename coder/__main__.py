@@ -3,19 +3,20 @@ import coder.coder as coder_
 from coder import tasks
 
 
-def main():
-    langchain_cli()
-
-
 @click.group()
-def langchain_cli():
+def cli():
     """
     CLI for LangChain document processing pipeline.
     """
     pass
 
 
-@langchain_cli.command()
+@cli.group("code")
+def code():
+    pass
+
+
+@code.command("run")
 @click.argument('question')
 def coder(question):
     """
@@ -24,11 +25,38 @@ def coder(question):
     print(coder_.coder(question))
 
 
-@langchain_cli.command()
+@cli.group("ingest")
+def ingest():
+    pass
+
+
+@ingest.command("directory")
 @click.argument('path')
 def ingest_directory(path):
     """
     Pull a certain directory of code into the vectorstore
     """
-    tasks.store_directory(path)
+    tasks.ingest_directory(path)
 
+
+@ingest.command("website")
+@click.argument('url')
+def store_website(url):
+    """
+    Pull code from a website and store it in the vectorstore
+    """
+    tasks.ingest_website(url)
+
+
+@ingest.command("github")
+@click.argument('repo_url')
+def store_github_repo(repo_url):
+    """
+    Pull code from a GitHub repository and store it in the vectorstore
+    """
+    owner, repo = repo_url.split('/')[-2:]
+    tasks.ingest_github_repo(owner, repo)
+
+
+if __name__ == "__main__":
+    cli()

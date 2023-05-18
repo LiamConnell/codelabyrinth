@@ -15,10 +15,10 @@ GITHUB_USER = "liamconnell"
 
 LOGGER = logging.getLogger(__name__)
 
-__all__ = ["ingest_code_files", "ingest_docs_website", "ingest_github_repo"]
+__all__ = ["load_code_files", "load_docs_website", "load_github_repo"]
 
 
-def ingest_code_files(directory: str = "./lliam") -> list[Document]:
+def load_code_files(directory: str = "./lliam") -> list[Document]:
     code_files = glob.glob(f"{directory}/**/*.py", recursive=True)
     code_data = []
     for code_file in code_files:
@@ -29,9 +29,9 @@ def ingest_code_files(directory: str = "./lliam") -> list[Document]:
     return code_data
 
 
-def ingest_docs_website(base_url: str, max_workers: int = 10) -> list[Document]:
+def load_docs_website(base_url: str, max_workers: int = 10) -> list[Document]:
     """
-    Ingests documents from a website by scraping the provided base_url.
+    Loads documents from a website by scraping the provided base_url.
 
     Args:
         base_url (str): The base URL of the website.
@@ -96,9 +96,9 @@ def _scrape_doc(url):
     return text
 
 
-def ingest_github_repo(owner: str, repo: str, path: str = "", file_types: list[str] = None) -> list[Document]:
+def load_github_repo(owner: str, repo: str, path: str = "", file_types: list[str] = None) -> list[Document]:
     """
-    Ingests files from a GitHub repository.
+    Loads files from a GitHub repository.
 
     Args:
         owner (str): The owner of the GitHub repository.
@@ -133,6 +133,6 @@ def ingest_github_repo(owner: str, repo: str, path: str = "", file_types: list[s
                     )
                 )
         if file["type"] == "dir":
-            docs += ingest_github_repo(owner, repo, os.path.join(path, file['name']), file_types)
+            docs += load_github_repo(owner, repo, os.path.join(path, file['name']), file_types)
 
     return docs
