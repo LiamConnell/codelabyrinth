@@ -1,3 +1,5 @@
+import os
+
 from langchain import PromptTemplate, LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document

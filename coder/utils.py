@@ -30,7 +30,7 @@ def count_tokens(text, model_name="gpt-3.5-turbo"):
 def summarize_title(query):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo")
     prompt = f"""Summarize the following as a pithy title: {query}\n\n"""
-    return llm([schema.HumanMessage(content=prompt)]).content.strip()
+    return llm([schema.HumanMessage(content=prompt)]).content.strip().replace('"', "")
 
 
 def get_git_hash():

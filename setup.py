@@ -25,7 +25,8 @@ setup(
     entry_points={
         'console_scripts': [
             'code = coder.__main__:code',
-            'ingest = coder.__main__:ingest'
+            'ingest = coder.__main__:ingest',
+            'borges = coder.__main__:cli'
         ]
     },
     description="GPT based code assistant",

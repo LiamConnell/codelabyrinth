@@ -21,6 +21,8 @@ __all__ = ["load_code_files", "load_docs_website", "load_github_repo"]
 
 def load_code_files(directory: str = "./lliam") -> list[Document]:
     code_files = glob.glob(f"{directory}/**/*.py", recursive=True)
+    code_files += glob.glob(f"{directory}/**/*.ts", recursive=True)
+    code_files += glob.glob(f"{directory}/**/*.tsx", recursive=True)
     code_data = []
     for code_file in code_files:
         with open(code_file, "r", encoding="utf-8") as f:
