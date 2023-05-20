@@ -1,4 +1,3 @@
-// ui/src/components/SidePanel.tsx
 import React, { useState, useEffect } from 'react';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DeleteIcon from '@mui/icons-material/Delete';

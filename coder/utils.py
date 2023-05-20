@@ -7,6 +7,7 @@ import openai
 import tiktoken
 from langchain import schema
 from langchain.chat_models import ChatOpenAI
+from langchain.schema import Document
 
 MODEL_MAX_TOKENS = {
     "gpt-3.5-turbo": 4096,
@@ -82,3 +83,19 @@ class ConversationLogger:
         metadata_file_path = os.path.join(self.log_dir, "metadata.json")
         with open(metadata_file_path, "w") as f:
             json.dump(conversation_data, f)
+
+
+# TODO remove other impl and change references
+def format_doc(doc: Document):
+    language = ""
+    if doc.metadata['source'].endswith(".py"):
+        language = "python"
+    elif doc.metadata['source'].endswith(".ts"):
+        language = "typescript"
+    elif doc.metadata['source'].endswith(".tsx"):
+        language = "tsx"
+    elif doc.metadata['source'].endswith(".js"):
+        language = "javascript"
+    elif doc.metadata['source'].endswith(".jsx"):
+        language = "jsx"
+    return f"""```{language}\n#{doc.metadata['source']}\n{doc.page_content}\n```"""

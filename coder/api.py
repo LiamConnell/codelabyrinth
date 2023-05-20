@@ -5,10 +5,12 @@ from fastapi import FastAPI, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from coder import coder, tasks
+from coder import tasks
+from coder.agents import AGENTS
 from coder.vectorstore import VectorStore
 
 LOGS_DIR = "./logs"
+DEFAULT_AGENT = "QA with vectorstore"
 
 app = FastAPI()
 
@@ -24,6 +26,7 @@ app.add_middleware(
 class QARequest(BaseModel):
     question: str
     collections: list[str] | None = None
+    agent: str = DEFAULT_AGENT
 
 
 @app.post("/code/qa")
@@ -31,7 +34,8 @@ def code_qa(qa_request: QARequest):
     if qa_request.question == "What is Langchain?":
         os.makedirs(f"./logs/z{datetime.now()}_LangchainTest")
         return {"answer": "fake"}
-    return {"answer": coder.qa(qa_request.question, qa_request.collections[0])}
+    agent = AGENTS[qa_request.agent]
+    return {"answer": agent(qa_request.question, qa_request.collections)}
 
 
 class IngestDirectoryRequest(BaseModel):
@@ -104,7 +108,7 @@ def get_log(log_name):
 
 @app.get("/agents")
 def list_agents():
-    return ["QA with context", "QA with planning and context"]
+    return list(AGENTS.keys())
 
 
 if __name__ == "__main__":
