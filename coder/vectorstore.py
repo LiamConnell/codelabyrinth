@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 from langchain import LLMChain, PromptTemplate
+from langchain.chains import SequentialChain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import Document
@@ -81,42 +82,36 @@ class VectorStore:
             doc_set.remove(selected[-1])
         return selected
 
-    def similarity_search_with_evaluation(self, collection_name, query, k=1):
+    def similarity_search_with_evaluation(self, collection_name, query, k=5):
         documents = self.similarity_search(collection_name, query, k*2)
 
+        summarize_prompt_template = "Please summarize the following document:\n{formatted_document}"
+        SUMMARIZE_PROMPT = PromptTemplate(template=summarize_prompt_template, input_variables=["formatted_document"])
+
+        relevance_prompt_template = "How relevant is this document to the question, either showing how to solve it or showing the relevant parts of the codebase to operate on, or showing how similar features are implemented? Answer with a score between 0 and 100. Answer with the number only.\n\nDocument:\n{formatted_document}\n\nSummary:\n{summary}\n\nQuestion: {question}\n\nScore: "
+        RELEVANCE_PROMPT = PromptTemplate(template=relevance_prompt_template, input_variables=["formatted_document", "summary", "question"])
+
         llm = ChatOpenAI(temperature=0)
-        # evaluation_prompt_template = """
-        #     Does the following document add useful context for answering the question?
-        #     Answer with 'yes' or 'no'\n\nDocument:\n{formatted_document}\n\nQuestion: {question}
-        # """
-        # evaluation_prompt_template = """
-        #     Is the following document relevant in any way as context to answer the question?
-        #     OR
-        #     Does it provide code that should be modified in the answer?
-        #     Answer with 'yes' or 'no'\n\nDocument:\n{formatted_document}\n\nQuestion: {question}
-        # """
-        evaluation_prompt_template = "Summarize the document. Should the document be included as context when answering the question in order to understand about the codebase? First summarize, then answer with 'yes' or 'no'.\n\nDocument:\n{formatted_document}\n\nQuestion: {question}"
-        EVALUATION_PROMPT = PromptTemplate(template=evaluation_prompt_template,
-                                           input_variables=["formatted_document", "question"])
-        summary_prompt_template = "Summarize the document.\n\nDocument:\n{formatted_document}\n\nQuestion: {question}"
-        summary_prompt = PromptTemplate(
-            template=summary_prompt_template, input_variables=["formatted_document", "question"])
-        evaluation_chain = LLMChain(llm=llm, prompt=summary_prompt)
+        summarize_chain = LLMChain(llm=llm, prompt=SUMMARIZE_PROMPT)
+        relevance_chain = LLMChain(llm=llm, prompt=RELEVANCE_PROMPT)
 
-        def evaluate_document(document: Document, question: str) -> bool:
+        def evaluate_document_relevancy(document: Document, question: str) -> float:
             formatted_document = format_doc(document)
-            # print(formatted_document)
-            result = evaluation_chain.apply([{"formatted_document": formatted_document, "question": question}])[0]
-            print(result['text'].strip().lower())
-            print('yes' in result['text'].strip().lower())
-            return 'yes' in result['text'].strip().lower()
+            summary = summarize_chain.apply([{"formatted_document": formatted_document}])[0]['text']
+            relevance_score = relevance_chain.apply([{
+                "formatted_document": formatted_document, "summary": summary, "question": question
+            }])[0]['text']
+            print(relevance_score.strip())
+            return float(relevance_score.strip())
 
-        eval_doc_fn = functools.partial(evaluate_document, question=query)
+        eval_doc_fn = functools.partial(evaluate_document_relevancy, question=query)
 
         with ThreadPoolExecutor(max_workers=20) as ex:
             evaluations = list(ex.map(eval_doc_fn, documents))
 
-        return [doc for i, doc in enumerate(documents) if evaluations[i]][:k]
+        doc_evals = sorted(zip(documents, evaluations), key=lambda x: x[1], reverse=True)
+
+        return [doc for doc, e in doc_evals[:k]]
 
 
 def cosine_similarity(vector_a, vector_b):
