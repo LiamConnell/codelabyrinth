@@ -9,6 +9,7 @@ from langchain.chains import SequentialChain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import Document
+from langchain.tools import Tool
 from langchain.vectorstores.pgvector import PGVector
 
 from coder.db import Database
@@ -112,6 +113,22 @@ class VectorStore:
         doc_evals = sorted(zip(documents, evaluations), key=lambda x: x[1], reverse=True)
 
         return [doc for doc, e in doc_evals[:k]]
+
+    def get_tool(self, collection_name: str, **kwargs):
+        # fn = functools.partial(self.similarity_search, collection_name=collection_name, **kwargs)
+        fn = lambda q: self.similarity_search(collection_name, q)
+        # TODO: extra verbiage for codebases
+        description = (
+            "Useful for when you need to answer questions about {collection_name}. "
+            "Whenever you need information about {collection_name} "
+            "you should ALWAYS use this. "
+            "Input should be a fully formed question."
+        )
+        return Tool.from_function(
+            func=fn,
+            name=f"Retrieve {collection_name.replace(' ', '_')} Documents",
+            description=description.format(collection_name=collection_name)
+        )
 
 
 def cosine_similarity(vector_a, vector_b):

@@ -18,7 +18,7 @@ def agent(question: str, vectorstore_collections: list[str]):
     vectorstore_collections = vectorstore_collections
     docs = []
     for collection in vectorstore_collections:
-        docs.extend(v.similarity_search(collection, question, k=3))
+        docs.extend(v.similarity_search(collection, question, k=4))
     context = "\n".join([_format_doc(doc) for doc in docs])
     result = chain.apply([{"question": question, "context": context}])[0]
 
