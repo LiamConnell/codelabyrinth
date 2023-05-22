@@ -3,6 +3,8 @@
 Code Labyrinth is a tool for using LLM chatbots in coding workflows. 
 It uses `Langchain` and `PGVector` to provide context about the working codebase and relevant libraries.
 
+![img.png](docs/img.png)
+
 ## Features
 1. Ingest document collections from any `readthedocs` website
 2. Ingest all code files from a local directory or github repo and keep them up to date
