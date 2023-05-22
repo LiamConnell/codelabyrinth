@@ -73,25 +73,59 @@ def load_docs_website(base_url: str, max_workers: int = 10) -> list[Document]:
     return docs
 
 
+def load_gee_website(base_url: str = "https://developers.google.com", max_workers: int = 10) -> list[Document]:
+    def get_links(base_url_):
+        response = requests.get(base_url_)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        x = soup.find("div", class_="devsite-book-nav-wrapper")
+        links = [l.get('href') for l in x.find_all('a', class_="devsite-nav-title")]
+        return list(set(links))
+
+    links = get_links("https://developers.google.com/earth-engine/guides") + get_links(
+        "https://developers.google.com/earth-engine/apidocs")
+    links = list(set(links))
+
+    def scrape_doc_(link):
+        try:
+            doc = _scrape_doc(urllib.parse.urljoin(base_url, link))
+        except Exception as e:
+            LOGGER.error(e)
+            LOGGER.error(traceback.format_exc())
+            return
+        return Document(
+            page_content=doc,
+            metadata={"base_url": base_url, "link": link, "source": urllib.parse.urljoin(base_url, link)}
+        )
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        docs = list(tqdm(executor.map(scrape_doc_, links)))
+
+    docs = [doc for doc in docs if doc is not None]
+
+    return docs
+
+
 def _scrape_doc(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
-    text = soup.find_all("main", {"id": "main-content"})
-    if len(text) == 0:
-        text = soup.find_all("div", {"role": "main"})
-    if len(text) == 0:
-        text = soup.find_all('article', {'role': 'main'})
+    text = soup.find("main", {"id": "main-content"})
+    if text is None:
+        text = soup.find("div", {"role": "main"})
+    if text is None:
+        text = soup.find('article', {'role': 'main'})
+    if text is None:
+        text = soup.find("div", class_="devsite-article-body")
 
     if soup is None:
         print(f"Nothing found for {url}")
         return
 
     # remove all script and style elements
-    for script in soup(["script", "style", "nav"]):
-        script.extract()
+    # for script in soup(["script", "style", "nav"]):
+    #     script.extract()
 
     # get text
-    text = text[0].get_text()
+    text = text.get_text()
 
     # break into lines and remove leading and trailing space on each
     lines = (line.strip() for line in text.splitlines())

@@ -1,5 +1,4 @@
 import click
-from coder import coder
 from coder import tasks
 from coder.vectorstore import VectorStore
 
@@ -41,14 +40,15 @@ def code():
     pass
 
 
-@code.command("qa")
-@click.argument('question')
-@click.option("--collection_name", "-c", type=str, default=None)
-def qa(question, collection_name=None):
-    """
-    Ask the coder something.
-    """
-    print(coder.qa(question, vectorstore_collection=collection_name))
+# FIXME: update with agent options
+# @code.command("qa")
+# @click.argument('question')
+# @click.option("--collection_name", "-c", type=str, default=None)
+# def qa(question, collection_name=None):
+#     """
+#     Ask the coder something.
+#     """
+#     print(coder.qa(question, vectorstore_collection=collection_name))
 
 
 @cli.group("ingest")

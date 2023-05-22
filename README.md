@@ -1,13 +1,19 @@
+# Code Labyrinth
+
+Code Labyrinth is a tool for using LLM chatbots in coding workflows. 
+It uses `Langchain` and `PGVector` to provide context about the working codebase and relevant libraries.
+
+## Features
+1. Ingest document collections from any `readthedocs` website
+2. Ingest all code files from a local directory or github repo and keep them up to date
+3. Add relevant documents to the context using vectorstore similarity retrieval of questions asked to a LLM.
+4. Choose the appropriate agent for the task - simple Question-Answer agents or Plan-and-Execute agent
+5. Operate everything with a convenient user interface
+
 ## Setup instructions
-
-TODO
-* setup instructions/docker compose
-* refactor api to use dependency injection 
-* refactor api to use Threadpool for long calcs
-
-Agents
-* plan/execute, react
-* multi-vector store retrieval 
-* vectorstore as tool
-
-Create a new agent that uses a plan-and-execute strategy to answer the question. It should still get documents from a vectorstore and put them into the prompt context. 
+1. Start the Postgres PGVector server: `docker compose up`
+2. Set up PGVector extension: `python -c "from coder.db import install_extension; install_extension()"`
+3. Set up python environment: `virtualenv venv && venv/bin/activate && pip install .`
+4. Start backend server: `python -m coder api`
+5. Set up frontend environment: `cd ui && npm install`
+6. Start frontend (dev) server: `npm run start`

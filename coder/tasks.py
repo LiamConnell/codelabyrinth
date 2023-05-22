@@ -28,6 +28,17 @@ def ingest_website(base_url, metadata=None, name=None):
     v.add_docs(name, docs)
 
 
+def ingest_gee_docs_website(base_url, metadata=None, name=None):
+    name = name or base_url
+
+    v = vectorstore.VectorStore()
+    docs = doc_loaders.load_gee_website()
+
+    metadata = metadata or {}
+    metadata.update({"base_url": base_url, "timestamp": str(datetime.now())})
+    v.create_collection(name, metadata)
+    v.add_docs(name, docs)
+
 def ingest_github_repo(owner, repo, path="", file_types=None, metadata=None, name=None):
     name = name or f"{owner}/{repo}/{path}"
     v = vectorstore.VectorStore()

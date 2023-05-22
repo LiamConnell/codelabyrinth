@@ -1,4 +1,5 @@
 import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from fastapi import FastAPI, Query, Body
@@ -11,6 +12,8 @@ from coder.vectorstore import VectorStore
 
 LOGS_DIR = "./logs"
 DEFAULT_AGENT = "QA with vectorstore"
+THREAD_POOL = ThreadPoolExecutor(max_workers=10)
+
 
 app = FastAPI()
 
@@ -35,7 +38,10 @@ def code_qa(qa_request: QARequest):
         os.makedirs(f"./logs/z{datetime.now()}_LangchainTest")
         return {"answer": "fake"}
     agent = AGENTS[qa_request.agent]
-    return {"answer": agent(qa_request.question, qa_request.collections)}
+
+    THREAD_POOL.submit(agent, qa_request.question, qa_request.collections)
+
+    return {"answer": "running..."}
 
 
 class IngestDirectoryRequest(BaseModel):

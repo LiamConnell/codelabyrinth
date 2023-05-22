@@ -92,7 +92,8 @@ class VectorStore:
         relevance_prompt_template = "How relevant is this document to the question, either showing how to solve it or showing the relevant parts of the codebase to operate on, or showing how similar features are implemented? Answer with a score between 0 and 100. Answer with the number only.\n\nDocument:\n{formatted_document}\n\nSummary:\n{summary}\n\nQuestion: {question}\n\nScore: "
         RELEVANCE_PROMPT = PromptTemplate(template=relevance_prompt_template, input_variables=["formatted_document", "summary", "question"])
 
-        llm = ChatOpenAI(temperature=0)
+        # llm = ChatOpenAI(temperature=0)
+        llm = ChatOpenAI(model_name="gpt-4", temperature=0)
         summarize_chain = LLMChain(llm=llm, prompt=SUMMARIZE_PROMPT)
         relevance_chain = LLMChain(llm=llm, prompt=RELEVANCE_PROMPT)
 

@@ -3,9 +3,6 @@ version: '3.8'
 services:
   db:
     image: ankane/pgvector:latest
-#    build:
-#      context: ./pg_vectorstore
-#      dockerfile: Dockerfile
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
